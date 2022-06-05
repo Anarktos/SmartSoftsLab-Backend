@@ -1,0 +1,513 @@
+openapi: "3.0.1"
+info:
+  title: "SmartSofts Camilo Blanco"
+  version: "1.0.0"
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: "User"
+    description: "User endpoints"
+  - name: "Product"
+    description: "Product endpoints"
+  - name: "Purchases"
+    description: "Purchases endpoints"
+components:
+  schemas:
+    User:
+      type: object
+      required: ["name", "money", "password"]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          description: "User name"
+        money:
+          type: number
+          format: double
+          description: "User money"
+        password:
+          type: string
+          description: "User password"
+        purchases:
+          type: array
+          items:
+            $ref: '#/components/schemas/Purchase'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Product:
+      type: object
+      required: ["name", "category", "price", "quantity"]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          description: "Product name"
+        price:
+          type: number
+          format: double
+          description: "Product price"
+        category:
+          type: string
+          description: "Product category"
+        quantity:
+          type: integer
+          format: int64
+          description: "Product quantity"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Purchase:
+      type: object
+      required: ["products", "quantities"]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user:
+          $ref: '#/components/schemas/User'
+        products:
+          type: array
+          description: "Products in purchase"
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: number
+          format: double
+          description: "Total price of purchase"
+        created_at:
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: "Bearer authentication"
+      scheme: bearer
+      bearerFormat: JWT
+security: 
+   - bearerAuth: []
+paths:
+  /user/create:
+    post:
+      tags:
+        - User
+      description: "Create user"
+      requestBody:
+        description: "Create user"
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "money", "password"]
+              properties:
+                name:
+                  type: string
+                  description: "User name"
+                money:
+                  type: number
+                  format: double
+                  description: "User money"
+                password:
+                  type: string
+                  description: "User password"
+        required: true
+      responses:
+        200:
+          description: "Create user"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /auth/login:
+    post:
+      tags:
+        - User
+      description: "Login user"
+      requestBody:
+        description: "Login user"
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "password"]
+              properties:
+                name:
+                  type: string
+                  description: "User name"
+                password:
+                  type: string
+                  description: "User password"
+        required: true
+      responses:
+        200:
+          description: "Login user"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["token"]
+                properties:
+                  token:
+                    type: string
+                    description: "User token"
+        400:
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["error"]
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /products:
+    get:
+      tags:
+        - Product
+      description: "Get all products"
+      responses:
+        200:
+          description: "Get all products"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        204:
+          description: "No content"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /products/{id}:
+    get:
+      tags:
+        - Product
+      description: "Get product by id"
+      parameters:
+        - name: id
+          in: path
+          description: "Product id"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Get product by id"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        404:
+          description: "Not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /products/create:
+    post:
+      tags:
+        - Product
+      description: "Create product"
+      requestBody:
+        description: "Create product"
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "category", "price", "quantity"]
+              properties:
+                name:
+                  type: string
+                  description: "Product name"
+                category:
+                  type: string
+                  description: "Product category"
+                price:
+                  type: number
+                  format: double
+                  description: "Product price"
+                quantity:
+                  type: integer
+                  format: int64
+                  description: "Product quantity"
+        required: true
+      responses:
+        200:
+          description: "Product created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: "Incorrect data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /products/update/{id}:
+    put:
+      tags:
+        - Product
+      description: "Update product"
+      parameters:
+        - name: id
+          in: path
+          description: "Product id"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: "Update product"
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "category", "price", "quantity"]
+              properties:
+                name:
+                  type: string
+                  description: "Product name"
+                category:
+                  type: string
+                  description: "Product category"
+                price:
+                  type: number
+                  format: double
+                  description: "Product price"
+                quantity:
+                  type: integer
+                  format: int64
+                  description: "Product quantity"
+        required: true
+      responses:
+        200:
+          description: "Product updated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: "Incorrect data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        404:
+          description: "Not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /products/delete/{id}:
+    delete:
+      tags:
+        - Product
+      description: "Delete product"
+      parameters:
+        - name: id
+          in: path
+          description: "Product id"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Product deleted"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "message"
+        400:
+          description: "Incorrect data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        404:
+          description: "Not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+  /buy:
+    post:
+      tags:
+        - Purchases
+      description: "Buy products"
+      requestBody:
+        description: "Buy products"
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["product_id", "quantity"]
+              properties:
+                productIds:
+                  type: array
+                  description: "Product ids"
+                  items:
+                    type: integer
+                    format: int64
+                quantities:
+                  type: array
+                  description: "Product quantities"
+                  items:
+                    type: integer
+                    format: int64
+        required: true
+      responses:
+        200:
+          description: "Product bought"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        400:
+          description: "Incorrect data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: "Error message"
+
+  
+      
+              
+  
+
+
+
